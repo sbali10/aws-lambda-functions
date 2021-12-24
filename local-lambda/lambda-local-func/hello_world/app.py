@@ -33,7 +33,7 @@ def lambda_handler(event, context):
         RunningInstances = [instance.id for instance in instances]
         for filteredRunningInstances in RunningInstances:
             if filteredRunningInstances != []:
-                print(filteredRunningInstances,',',region)
+                #print(filteredRunningInstances,',',region)
 
 
 
@@ -44,7 +44,7 @@ def lambda_handler(event, context):
                     MetricName='CPUUtilization',
                     StartTime=datetime.now() + timedelta(minutes = -180),
                     EndTime=datetime.now(),
-                    Statistics=['Average'],
+                    Statistics=['Maximum'],
                     Period=4800,
                     Dimensions=[
                         {
@@ -53,7 +53,7 @@ def lambda_handler(event, context):
                         },
                     ],
                 )
-
+                
                 stats2 = cloudwatch.get_metric_statistics(
                     Namespace='AWS/EC2',
                     MetricName='NetworkPacketsIn',
@@ -68,7 +68,6 @@ def lambda_handler(event, context):
                         },
                     ],
                 )
-
                 stats3 = cloudwatch.get_metric_statistics(
                     Namespace='AWS/EC2',
                     MetricName='NetworkPacketsOut',
@@ -86,28 +85,27 @@ def lambda_handler(event, context):
                 
                 
                 
-        
                 
                 deneme = [filteredRunningInstances,',', region, ',', stats, ',', stats2, ',',stats3]
-                print(deneme)
+                
                 
             
-                # ses_client = boto3.client('ses', 'eu-west-2')
-                # rsp = ses_client.send_email(
-                #     Source=os.environ.get('FROM_EMAIL_ADDRESS'),
-                #     Destination={
-                #         'ToAddresses': os.environ.get('TO_EMAIL_ADDRESSES').strip('][').split(', ')
-                #     },
-                #     Message={
-                #         'Subject': {
-                #             'Data': 'CPU Usage of Up Instances',
-                #             'Charset': 'utf-8'
-                #         },
-                #         'Body': {
-                #             'Text': {
-                #                 'Data': json.dumps(deneme, indent=4, sort_keys=True, default=str),
-                #                 'Charset': 'utf-8'
-                #             }
-                #         }
-                #     }
-                # )
+                ses_client = boto3.client('ses', 'eu-west-2')
+                rsp = ses_client.send_email(
+                    Source=os.environ.get('FROM_EMAIL_ADDRESS'),
+                    Destination={
+                        'ToAddresses': os.environ.get('TO_EMAIL_ADDRESSES').strip('][').split(', ')
+                    },
+                    Message={
+                        'Subject': {
+                            'Data': 'CPU usage of Running Instances',
+                            'Charset': 'utf-8'
+                        },
+                        'Body': {
+                            'Text': {
+                                'Data': json.dumps(deneme, indent=4, sort_keys=True, default=str),
+                                'Charset': 'utf-8'
+                            }
+                        }
+                    }
+                ) 
