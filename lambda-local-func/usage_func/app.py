@@ -86,7 +86,7 @@ def lambda_handler(event, context):
                 
                 
                 
-                deneme = [filteredRunningInstances,',', region, ',', stats["Label"], stats["Datapoints"], ',', stats2["Label"], stats2["Datapoints"], ',',stats3["Label"], stats3["Datapoints"]]
+                deneme = [filteredRunningInstances,  region,  stats["Label"], stats["Datapoints"],  stats2["Label"], stats2["Datapoints"],  stats3["Label"], stats3["Datapoints"]]
                
                 
                 
