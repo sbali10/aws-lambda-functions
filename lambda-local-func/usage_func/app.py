@@ -45,7 +45,7 @@ def lambda_handler(event, context):
                     StartTime=datetime.now() + timedelta(minutes = -180),
                     EndTime=datetime.now(),
                     Statistics=['Maximum'],
-                    Period=4800,
+                    Period=9600,
                     Dimensions=[
                         {
                             'Name': 'InstanceId',
@@ -86,7 +86,8 @@ def lambda_handler(event, context):
                 
                 
                 
-                deneme = [filteredRunningInstances,',', region, ',', stats, ',', stats2, ',',stats3]
+                deneme = [filteredRunningInstances,',', region, ',', stats["Label"], stats["Datapoints"], ',', stats2["Label"], stats2["Datapoints"], ',',stats3["Label"], stats3["Datapoints"]]
+               
                 
                 
             
@@ -103,9 +104,9 @@ def lambda_handler(event, context):
                         },
                         'Body': {
                             'Text': {
-                                'Data': json.dumps(deneme, indent=4, sort_keys=True, default=str),
+                                'Data': json.dumps(deneme, indent=2, default=str),
                                 'Charset': 'utf-8'
                             }
                         }
                     }
-                ) 
+                )
