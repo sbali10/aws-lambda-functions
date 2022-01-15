@@ -99,7 +99,7 @@ def lambda_handler(event, context):
                     },
                     Message={
                         'Subject': {
-                            'Data': 'CPU usage of Running Instances',
+                            'Data': 'Running EC2 InstanceDetails',
                             'Charset': 'utf-8'
                         },
                         'Body': {
