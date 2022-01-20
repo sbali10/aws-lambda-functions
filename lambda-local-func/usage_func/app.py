@@ -16,10 +16,15 @@ ec2 = boto3.client('ec2')
 regions = ec2.describe_regions()['Regions']
 regionList = [e['RegionName'] for e in regions]
 
+
 def lambda_handler(event, context):
+    deneme = dict()
+
     
     #stats = dict()
-    #k = dict()
+    #send_format = ""
+    #lambda_handler.send_format = dict()
+    
 
     for region in regionList:
         ec2 = boto3.resource('ec2',region)
@@ -32,6 +37,7 @@ def lambda_handler(event, context):
         instances = ec2.instances.filter(Filters=filters)
         RunningInstances = [instance.id for instance in instances]
         for filteredRunningInstances in RunningInstances:
+            
             if filteredRunningInstances != []:
                 #print(filteredRunningInstances,',',region)
 
@@ -68,6 +74,7 @@ def lambda_handler(event, context):
                         },
                     ],
                 )
+                
                 stats3 = cloudwatch.get_metric_statistics(
                     Namespace='AWS/EC2',
                     MetricName='NetworkPacketsOut',
@@ -86,27 +93,39 @@ def lambda_handler(event, context):
                 
                 
                 
-                deneme = [filteredRunningInstances,  region,  stats["Label"], stats["Datapoints"],  stats2["Label"], stats2["Datapoints"],  stats3["Label"], stats3["Datapoints"]]
-               
-                
+                #deneme = [filteredRunningInstances,  region,  stats["Label"], stats["Datapoints"],  stats2["Label"], stats2["Datapoints"],  stats3["Label"], stats3["Datapoints"]]
+                deneme[filteredRunningInstances] = {};
+                deneme[filteredRunningInstances]['region'] = region;
+                deneme[filteredRunningInstances]['CPU'] = {};
+                deneme[filteredRunningInstances]['CPU']['Label'] = stats["Label"];
+                deneme[filteredRunningInstances]['CPU']['Datapoints'] = stats["Datapoints"];
+                deneme[filteredRunningInstances]['NetworkIn'] = {}
+                deneme[filteredRunningInstances]['NetworkIn']['Label'] = stats2["Label"];
+                deneme[filteredRunningInstances]['NetworkIn']['Datapoints'] = stats2["Datapoints"];
+                deneme[filteredRunningInstances]['NetworkOut'] = {}
+                deneme[filteredRunningInstances]['NetworkOut']['Label'] = stats3["Label"];
+                deneme[filteredRunningInstances]['NetworkOut']['Datapoints'] = stats3["Datapoints"];
                 
             
-                ses_client = boto3.client('ses', 'eu-west-2')
-                rsp = ses_client.send_email(
-                    Source=os.environ.get('FROM_EMAIL_ADDRESS'),
-                    Destination={
-                        'ToAddresses': os.environ.get('TO_EMAIL_ADDRESSES').strip('][').split(', ')
-                    },
-                    Message={
-                        'Subject': {
-                            'Data': 'Running EC2 InstanceDetails',
-                            'Charset': 'utf-8'
-                        },
-                        'Body': {
-                            'Text': {
-                                'Data': json.dumps(deneme, indent=2, default=str),
-                                'Charset': 'utf-8'
-                            }
-                        }
-                    }
-                )
+    print(json.dumps(deneme, indent=2, default=str))
+    print("sending email")
+    
+    ses_client = boto3.client('ses', 'eu-west-2')
+    rsp = ses_client.send_email(
+        Source=os.environ.get('FROM_EMAIL_ADDRESS'),
+        Destination={
+            'ToAddresses': os.environ.get('TO_EMAIL_ADDRESSES').strip('][').split(', ')
+        },
+        Message={
+            'Subject': {
+                'Data': 'Running EC2 InstanceDetails',
+                'Charset': 'utf-8'
+            },
+            'Body': {
+                'Text': {
+                    'Data': json.dumps(deneme, indent=2, default=str),
+                    'Charset': 'utf-8'
+                }
+            }
+        }
+    )
